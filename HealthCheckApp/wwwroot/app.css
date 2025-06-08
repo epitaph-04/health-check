@@ -49,3 +49,27 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+/* HealthCheckDashboard specific styles */
+.health-dashboard-container {
+    padding: 15px;
+}
+
+.status-cell {
+    font-weight: bold;
+}
+
+.error-message-cell {
+    font-size: 0.9em;
+    color: #721c24; /* Dark red, good for light backgrounds */
+    word-break: break-word; /* Prevent long errors from breaking layout */
+}
+
+/* Refine Bootstrap's contextual classes if needed, or add new ones */
+/* For example, ensuring text color contrasts well with background */
+.table-danger .error-message-cell {
+    color: #721c24; /* Ensure it's readable on .table-danger */
+}
+.table-warning .error-message-cell {
+     color: #856404; /* Ensure it's readable on .table-warning */
+}
