@@ -1,0 +1,107 @@
+@page "/"
+@page "/health-dashboard"
+@inject NavigationManager NavigationManager
+@inject HealthCheckApp.Services.HealthCheckOrchestratorService OrchestratorService
+@implements IAsyncDisposable
+
+<div class="health-dashboard-container"> @* Added container *@
+    <h3>Application Health Dashboard</h3>
+
+    @if (healthCheckResults == null || !healthCheckResults.Any())
+    {
+        <p><em>Loading health statuses or no applications configured...</em></p>
+    }
+    else
+    {
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Application Name</th>
+                <th>Status</th>
+                <th>Response Time (ms)</th>
+                <th>Last Checked (UTC)</th>
+                <th>Error</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var result in healthCheckResults.OrderBy(r => r.ApplicationName))
+            {
+                <tr class_="@GetRowClass(result.Status)">
+                    <td>@result.ApplicationName</td>
+                    <td class="status-cell">@result.Status</td> @* Added class *@
+                    <td>@result.ResponseTime.TotalMilliseconds.ToString("F0")</td>
+                    <td>@result.LastCheckedUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td class="error-message-cell">@result.ErrorMessage</td> @* Added class *@
+                </tr>
+            }
+        </tbody>
+    </table>
+    }
+</div> @* End container *@
+@code {
+    private Microsoft.AspNetCore.SignalR.Client.HubConnection? hubConnection;
+    private List<HealthCheckApp.Models.HealthCheckResult> healthCheckResults = new List<HealthCheckApp.Models.HealthCheckResult>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load initial statuses
+        var initialStatuses = OrchestratorService.GetAllCurrentStatuses();
+        if (initialStatuses != null)
+        {
+            healthCheckResults.AddRange(initialStatuses);
+        }
+
+        hubConnection = new Microsoft.AspNetCore.SignalR.Client.HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/healthcheckhub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<HealthCheckApp.Models.HealthCheckResult>("ReceiveHealthUpdate", (result) =>
+        {
+            var existingResult = healthCheckResults.FirstOrDefault(r => r.ApplicationName == result.ApplicationName);
+            if (existingResult != null)
+            {
+                existingResult.Status = result.Status;
+                existingResult.ResponseTime = result.ResponseTime;
+                existingResult.LastCheckedUtc = result.LastCheckedUtc;
+                existingResult.ErrorMessage = result.ErrorMessage;
+            }
+            else
+            {
+                healthCheckResults.Add(result);
+            }
+            InvokeAsync(StateHasChanged);
+        });
+
+        try
+        {
+            await hubConnection.StartAsync();
+            Console.WriteLine("SignalR Connection Started");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error starting SignalR connection: {ex.Message}");
+        }
+    }
+
+    private string GetRowClass(HealthCheckApp.Models.HealthStatus status)
+    {
+        return status switch
+        {
+            HealthCheckApp.Models.HealthStatus.Healthy => "table-success",
+            HealthCheckApp.Models.HealthStatus.Unhealthy => "table-danger",
+            HealthCheckApp.Models.HealthStatus.Degraded => "table-warning",
+            HealthCheckApp.Models.HealthStatus.Unknown => "table-info",
+            _ => ""
+        };
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+        {
+            hubConnection.Remove("ReceiveHealthUpdate");
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
