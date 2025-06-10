@@ -5,13 +5,12 @@ using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Custom Services Registration START
+builder.Services.AddCors();
 builder.Services.AddSingleton<ConfigurationService>();
-builder.Services.AddHttpClient(); // For IHttpClientFactory, used by HttpHealthCheckService
+builder.Services.AddHttpClient();
 builder.Services.AddTransient<IHealthCheckService, HttpHealthCheckService>();
 builder.Services.AddTransient<IHealthCheckService, DbHealthCheckService>();
 builder.Services.AddHostedService<HealthCheckOrchestratorService>();
@@ -22,31 +21,22 @@ builder.Services.AddResponseCompression(opts =>
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
         new[] { "application/octet-stream" });
 });
-// Custom Services Registration END
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-
-// Response Compression Middleware - place early in pipeline
 app.UseResponseCompression();
 
+app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 app.UseStaticFiles();
 app.UseAntiforgery();
-
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-// Custom Hub Mapping START
+app.MapBlazorHub();
 app.MapHub<HealthCheckHub>("/healthcheckhub");
-// Custom Hub Mapping END
 
 app.Run();

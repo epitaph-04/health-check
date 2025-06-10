@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HealthCheckApp.Services
 {
@@ -22,8 +23,10 @@ namespace HealthCheckApp.Services
                     {
                         PropertyNameCaseInsensitive = true,
                         AllowTrailingCommas = true,
-                        ReadCommentHandling = JsonCommentHandling.Skip
-                    });
+                        ReadCommentHandling = JsonCommentHandling.Skip,
+                        Converters = { new JsonStringEnumConverter() }
+                        
+                    })!;
                 }
                 else
                 {

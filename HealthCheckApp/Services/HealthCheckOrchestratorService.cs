@@ -1,84 +1,67 @@
 using HealthCheckApp.Models;
-using HealthCheckApp.Hubs; // Placeholder for HealthCheckHub
+using HealthCheckApp.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HealthCheckApp.Services
 {
-    public class HealthCheckOrchestratorService : IHostedService, IDisposable
+    public class HealthCheckOrchestratorService(
+        ILogger<HealthCheckOrchestratorService> logger,
+        IServiceProvider serviceProvider,
+        ConfigurationService configService,
+        IHubContext<HealthCheckHub, IHealthCheckClient> hubContext)
+        : BackgroundService
     {
-        private readonly ILogger<HealthCheckOrchestratorService> _logger;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ConfigurationService _configService;
-        private readonly IHubContext<HealthCheckHub> _hubContext; // HealthCheckHub will be created later
-        private Timer? _timer;
-        private readonly ConcurrentDictionary<string, HealthCheckResult> _healthCheckResults = new ConcurrentDictionary<string, HealthCheckResult>();
-        private List<ApplicationConfig> _applicationConfigs = new List<ApplicationConfig>();
+        private readonly TimeSpan _period = TimeSpan.FromSeconds(30);
+        private readonly ConcurrentDictionary<string, HealthCheckResult> _healthCheckResults = new ();
+        private List<ApplicationConfig> _applicationConfigs = new ();
 
-        public HealthCheckOrchestratorService(
-            ILogger<HealthCheckOrchestratorService> logger,
-            IServiceProvider serviceProvider,
-            ConfigurationService configService,
-            IHubContext<HealthCheckHub> hubContext) // HealthCheckHub will be created later
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger = logger;
-            _serviceProvider = serviceProvider;
-            _configService = configService;
-            _hubContext = hubContext;
-        }
-
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Health Check Orchestrator Service starting.");
-            _applicationConfigs = _configService.Config?.Applications ?? new List<ApplicationConfig>();
+            logger.LogInformation("Health Check Orchestrator Service starting.");
+            _applicationConfigs = configService.Config.Applications ?? new ();
 
             foreach (var appConfig in _applicationConfigs)
             {
                 _healthCheckResults.TryAdd(appConfig.Name, new HealthCheckResult(appConfig.Name) { Status = HealthStatus.Unknown });
             }
+            
+            using var timer = new PeriodicTimer(_period);
 
-            // Initial check run shortly after start, then periodic
-            _timer = new Timer(async _ => await RunAllChecksAsync(), null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30));
-
-            return Task.CompletedTask;
+            while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
+            {
+                logger.LogInformation("Executing health check {Time}", DateTime.Now);
+                await RunAllChecksAsync();
+            }
         }
 
         private async Task RunAllChecksAsync()
         {
-            _logger.LogInformation("Running all health checks.");
-            if (!_applicationConfigs.Any())
+            logger.LogInformation("Running all health checks.");
+            if (_applicationConfigs.Count == 0)
             {
-                _logger.LogInformation("No applications configured for health checks.");
+                logger.LogInformation("No applications configured for health checks.");
                 return;
             }
-
-            // Get all registered health check services
-            var healthCheckServices = _serviceProvider.GetServices<IHealthCheckService>();
+            
+            var healthCheckServices = serviceProvider.GetServices<IHealthCheckService>().ToArray();
 
             foreach (var appConfig in _applicationConfigs)
             {
                 try
                 {
-                    var service = healthCheckServices.FirstOrDefault(s => s.Type == appConfig.Type);
+                    var service = healthCheckServices?.FirstOrDefault(s => s.Type == appConfig.Type);
                     if (service != null)
                     {
-                        _logger.LogInformation($"Checking health for {appConfig.Name} ({appConfig.Type}).");
+                        logger.LogInformation("Checking health for {appName} ({appType}).", appConfig.Name, appConfig.Type);
                         HealthCheckResult result = await service.CheckHealthAsync(appConfig);
                         _healthCheckResults[appConfig.Name] = result;
-                        await _hubContext.Clients.All.SendAsync("ReceiveHealthUpdate", result);
-                         _logger.LogInformation($"Health check for {appConfig.Name} completed: {result.Status}");
+                        await hubContext.Clients.All.ReceiveHealthUpdate(result);
+                         logger.LogInformation("Health check for {appName} completed: {status}", appConfig.Name, result.Status);
                     }
                     else
                     {
-                        _logger.LogWarning($"No IHealthCheckService found for type {appConfig.Type} (Application: {appConfig.Name}).");
+                        logger.LogWarning($"No IHealthCheckService found for type {appConfig.Type} (Application: {appConfig.Name}).");
                          var errorResult = new HealthCheckResult(appConfig.Name)
                         {
                             Status = HealthStatus.Unhealthy,
@@ -86,12 +69,12 @@ namespace HealthCheckApp.Services
                             LastCheckedUtc = DateTime.UtcNow
                         };
                         _healthCheckResults[appConfig.Name] = errorResult;
-                        await _hubContext.Clients.All.SendAsync("ReceiveHealthUpdate", errorResult);
+                        await hubContext.Clients.All.ReceiveHealthUpdate(errorResult);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Error during health check for {appConfig.Name}.");
+                    logger.LogError(ex, "Error during health check for {appName}.", appConfig.Name);
                     var errorResult = new HealthCheckResult(appConfig.Name)
                     {
                         Status = HealthStatus.Unhealthy,
@@ -99,7 +82,7 @@ namespace HealthCheckApp.Services
                         LastCheckedUtc = DateTime.UtcNow
                     };
                     _healthCheckResults[appConfig.Name] = errorResult;
-                    await _hubContext.Clients.All.SendAsync("ReceiveHealthUpdate", errorResult);
+                    await hubContext.Clients.All.ReceiveHealthUpdate(errorResult);
                 }
             }
         }
@@ -107,19 +90,6 @@ namespace HealthCheckApp.Services
         public IEnumerable<HealthCheckResult> GetAllCurrentStatuses()
         {
             return _healthCheckResults.Values.ToList();
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Health Check Orchestrator Service stopping.");
-            _timer?.Change(Timeout.Infinite, 0);
-            return Task.CompletedTask;
-        }
-
-        public void Dispose()
-        {
-            _timer?.Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }
