@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0f172a; /* bg-slate-900 */
+    color: #f1f5f9; /* text-slate-100 */
+}
+/* Ensure icons are vertically aligned with text */
+.icon-text-align {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle; /* Helps with alignment in some contexts */
+}

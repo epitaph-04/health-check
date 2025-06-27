@@ -2,10 +2,10 @@
 pub mod broadcast_actor {
     use crate::types::ServiceType;
     use actix::prelude::*;
-    use anyhow::Result;
     use chrono::{DateTime, Utc};
     use log::info;
     use serde::{Deserialize, Serialize};
+    use tokio::sync::broadcast;
 
     #[derive(Serialize, Deserialize, Clone)]
     pub enum CheckStatus {
@@ -22,7 +22,7 @@ pub mod broadcast_actor {
     }
 
     #[derive(Message, Serialize, Deserialize, Clone)]
-    #[rtype(result = "Result<(), anyhow::Error>")]
+    #[rtype(result = "()")]
     pub struct HealthCheckInfo {
         pub name: String,
         pub service_type: ServiceType,
@@ -31,7 +31,15 @@ pub mod broadcast_actor {
         pub latest_status: HealthCheckStatus,
     }
 
-    pub struct BroadcastActor {}
+    pub struct BroadcastActor {
+        sender: broadcast::Sender<HealthCheckInfo>
+    }
+    
+    impl BroadcastActor {
+        pub fn new(sender: broadcast::Sender<HealthCheckInfo>) -> Self {
+            BroadcastActor { sender }
+        }
+    }
 
     impl Actor for BroadcastActor {
         type Context = Context<Self>;
@@ -46,10 +54,10 @@ pub mod broadcast_actor {
     }
 
     impl Handler<HealthCheckInfo> for BroadcastActor {
-        type Result = ResponseFuture<Result<()>>;
+        type Result = ();
 
-        fn handle(&mut self, _msg: HealthCheckInfo, _ctx: &mut Context<Self>) -> Self::Result {
-            Box::pin(async move { Ok(()) })
+        fn handle(&mut self, msg: HealthCheckInfo, _ctx: &mut Context<Self>) -> Self::Result {
+            self.sender.send(msg).ok();
         }
     }
 }

@@ -1303,6 +1303,7 @@ dependencies = [
  "chrono",
  "console_error_panic_hook",
  "env_logger",
+ "futures-util",
  "leptos",
  "leptos_actix",
  "leptos_meta",
@@ -1310,6 +1311,9 @@ dependencies = [
  "log",
  "reqwest",
  "serde",
+ "serde_json",
+ "tokio",
+ "tokio-stream",
  "toml",
  "wasm-bindgen",
 ]
@@ -3280,6 +3284,7 @@ dependencies = [
  "futures-core",
  "pin-project-lite",
  "tokio",
+ "tokio-util",
 ]
 
 [[package]]

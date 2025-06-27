@@ -24,9 +24,9 @@ headers = [
 ]
 
 [[services]]
-name = "instagram"
+name = "whatsapp"
 type = "http"
-url = "https://instagram.com"
+url = "https://web.whatsapp.com"
 response_code = 200
 check_interval_seconds = 30
 headers = [

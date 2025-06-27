@@ -9,8 +9,11 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 toml = { version = "0.8" }
+actix = { version = "0.13.5", optional = true }
 actix-files = { version = "0.6", optional = true }
 actix-web = { version = "4", optional = true, features = ["macros"] }
+actix-rt = { version = "2.10.0", optional = true }
+actix-web-lab = { version = "0.24.1", optional = true }
 console_error_panic_hook = "0.1"
 leptos = { version = "0.8.2" }
 leptos_meta = { version = "0.8.2" }
@@ -18,15 +21,15 @@ leptos_actix = { version = "0.8.2", optional = true }
 leptos_router = { version = "0.8.2" }
 wasm-bindgen = "=0.2.100"
 anyhow = { version = "1.0.98" }
-actix = { version = "0.13.5", optional = true }
-actix-rt = { version = "2.10.0", optional = true }
-actix-web-lab = { version = "0.24.1", optional = true }
 log = "0.4.27"
 env_logger = "0.11.8"
 reqwest = { version = "0.12.20", optional = true }
 async-trait = { version = "0.1.88", optional = true }
 chrono = { version = "0.4.41", features = ["serde"] }
-
+tokio = { version = "1.45.1", features = ["rt", "rt-multi-thread", "time", "sync"], optional = true }
+tokio-stream = { version = "0.1.17", optional = true, features = ["sync"] }
+futures-util = { version = "0.3", optional = true }
+serde_json = "1.0.140"
 
 [features]
 csr = ["leptos/csr"]
@@ -38,9 +41,12 @@ ssr = [
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",
+  "dep:tokio",
+  "dep:tokio-stream",
   "dep:actix",
   "dep:actix-rt",
   "dep:actix-web-lab",
+  "dep:futures-util",
   "dep:reqwest",
   "dep:async-trait",
 ]
@@ -62,7 +68,7 @@ site-root = "target/site"
 # Defaults to pkg
 site-pkg-dir = "pkg"
 # [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to <site-root>/<site-pkg>/app.css
-style-file = "style/main.scss"
+style-file = "style/main.css"
 # Assets source dir. All files found here will be copied and synchronized to site-root.
 # The assets-dir cannot have a sub directory with the same name/path as site-pkg-dir.
 #

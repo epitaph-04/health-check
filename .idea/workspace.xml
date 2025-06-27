@@ -8,38 +8,32 @@
       <package file="$PROJECT_DIR$">
         <enabledFeature name="default" />
         <enabledFeature name="ssr" />
+        <enabledFeature name="hydrate" />
       </package>
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e873862d-a1a3-43a7-8c03-e1d2886a6ac4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/assets/favicon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/end2end/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/end2end/playwright.config.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/end2end/tests/example.spec.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/end2end/tsconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/actors/broadcaster.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/actors/health_check_actor.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/actors/mod.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/config.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/mod.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/style/main.scss" afterDir="false" />
+    <list default="true" id="5e90b0a4-4ea0-4d46-95ce-aec394f24b8e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/api.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tailwind.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tailwindcss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.toml" beforeDir="false" afterPath="$PROJECT_DIR$/config.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/actors/broadcaster.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/actors/broadcaster.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/actors/health_check_actor.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/actors/health_check_actor.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/actors/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/actors/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/style/main.scss" beforeDir="false" afterPath="$PROJECT_DIR$/style/main.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="RsBuildProfile:dev" />
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -51,13 +45,12 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MacroExpansionManager">
-    <option name="directoryName" value="RJ1JEt6Z" />
+    <option name="directoryName" value="i0ursZis" />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;customColor&quot;: &quot;&quot;,
-  &quot;associatedIndex&quot;: 6
+  &quot;associatedIndex&quot;: 0
 }</component>
-  <component name="ProjectId" id="2z15Xj53iqIPKN7W2lLyieKAxsB" />
+  <component name="ProjectId" id="2yzrJjhZ1esYvYwTlkg1wHVbgHc" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -66,9 +59,11 @@
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/mahassan2001/project/other/health-check&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -76,73 +71,50 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
     &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
-    &quot;org.rust.disableDetachedFileInspection/Users/epitaph.04/Projects/health-check/src/types/types.rs&quot;: &quot;true&quot;,
     &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.codeium.AppSettingsConfigurable&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.cargo.check&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public" />
+    </key>
+  </component>
   <component name="RsExternalLinterProjectSettings">
     <option name="tool" value="Clippy" />
-  </component>
-  <component name="RunManager" selected="Cargo.Run health-check">
-    <configuration name="Run health-check" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-      <option name="buildProfileId" value="dev" />
-      <option name="command" value="run --package health-check --bin health-check" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <option name="emulateTerminal" value="true" />
-      <option name="channel" value="DEFAULT" />
-      <option name="requiredFeatures" value="true" />
-      <option name="allFeatures" value="false" />
-      <option name="withSudo" value="false" />
-      <option name="buildTarget" value="REMOTE" />
-      <option name="backtrace" value="SHORT" />
-      <option name="isRedirectInput" value="false" />
-      <option name="redirectInputPath" value="" />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test health-check" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-      <option name="command" value="test --workspace" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <option name="emulateTerminal" value="true" />
-      <option name="channel" value="DEFAULT" />
-      <option name="requiredFeatures" value="true" />
-      <option name="allFeatures" value="false" />
-      <option name="withSudo" value="false" />
-      <option name="buildTarget" value="REMOTE" />
-      <option name="backtrace" value="SHORT" />
-      <option name="isRedirectInput" value="false" />
-      <option name="redirectInputPath" value="" />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="e873862d-a1a3-43a7-8c03-e1d2886a6ac4" name="Changes" comment="" />
-      <created>1750885780863</created>
+      <changelist id="5e90b0a4-4ea0-4d46-95ce-aec394f24b8e" name="Changes" comment="" />
+      <created>1750848173036</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1750885780863</updated>
-      <workItem from="1750885783243" duration="208000" />
-      <workItem from="1750886002654" duration="2768000" />
-      <workItem from="1750964114452" duration="10742000" />
+      <updated>1750848173036</updated>
+      <workItem from="1750848174292" duration="12591000" />
+      <workItem from="1750929044902" duration="9727000" />
+      <workItem from="1751017334244" duration="15627000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
