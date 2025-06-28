@@ -2,7 +2,7 @@
 pub mod configs {
     use anyhow::Result;
     use serde::{Deserialize, Serialize};
-    use std::fmt::Display;
+    use crate::types::ServiceType;
 
     #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct GlobalSettings {
@@ -15,23 +15,6 @@ pub mod configs {
             Self {
                 check_interval_seconds: 60,
                 timeout_seconds: 5,
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Serialize, Deserialize)]
-    pub enum ServiceType {
-        #[serde(rename = "http")]
-        Http,
-        #[serde(rename = "db")]
-        Db,
-    }
-
-    impl Display for ServiceType {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            match self {
-                ServiceType::Http => write!(f, "http"),
-                ServiceType::Db => write!(f, "db"),
             }
         }
     }

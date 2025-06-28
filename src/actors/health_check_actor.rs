@@ -1,9 +1,9 @@
 #[cfg(feature = "ssr")]
 pub mod health_check_actors {
     use crate::actors::broadcaster::broadcast_actor::{
-        BroadcastActor, CheckStatus, HealthCheckInfo, HealthCheckStatus,
+        BroadcastActor, HealthCheckInfo,
     };
-    use crate::types::ServiceType;
+    use crate::types::{CheckStatus, HealthCheckStatus, ServiceType};
     use actix::prelude::*;
     use anyhow::Result;
     use chrono::Utc;

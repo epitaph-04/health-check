@@ -1,25 +1,10 @@
 #[cfg(feature = "ssr")]
 pub mod broadcast_actor {
-    use crate::types::ServiceType;
+    use crate::types::{HealthCheckStatus, ServiceType};
     use actix::prelude::*;
-    use chrono::{DateTime, Utc};
     use log::info;
     use serde::{Deserialize, Serialize};
     use tokio::sync::broadcast;
-
-    #[derive(Serialize, Deserialize, Clone)]
-    pub enum CheckStatus {
-        Healthy,
-        Degraded,
-        Unhealthy,
-    }
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct HealthCheckStatus {
-        pub status: CheckStatus,
-        pub status_message: String,
-        pub response_time: u128,
-        pub timestamp: DateTime<Utc>,
-    }
 
     #[derive(Message, Serialize, Deserialize, Clone)]
     #[rtype(result = "()")]

@@ -3,7 +3,6 @@ pub mod actors;
 pub mod app;
 #[cfg(feature = "ssr")]
 pub mod api;
-#[cfg(feature = "ssr")]
 pub mod types;
 
 #[cfg(feature = "hydrate")]
