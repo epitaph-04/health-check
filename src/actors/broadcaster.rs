@@ -14,6 +14,7 @@ pub mod broadcast_actor {
         pub url: String,
         pub interval_seconds: u64,
         pub latest_status: HealthCheckStatus,
+        pub historic_status: Vec<HealthCheckStatus>,
     }
 
     pub struct BroadcastActor {

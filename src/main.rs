@@ -53,7 +53,7 @@ async fn main() -> std::io::Result<()> {
             .service(Files::new("/pkg", format!("{site_root}/pkg")))
             // serve other assets from the `assets` directory
             .service(Files::new("/assets", &site_root))
-            // serve the favicon from /favicon.ico
+            // serve the favicon from /favicon.png
             .service(favicon)
             .service(sse_handler)
             .leptos_routes(routes, {
@@ -88,14 +88,14 @@ async fn main() -> std::io::Result<()> {
 }
 
 #[cfg(feature = "ssr")]
-#[actix_web::get("favicon.ico")]
+#[actix_web::get("favicon.png")]
 async fn favicon(
     leptos_options: actix_web::web::Data<leptos::config::LeptosOptions>,
 ) -> actix_web::Result<actix_files::NamedFile> {
     let leptos_options = leptos_options.into_inner();
     let site_root = &leptos_options.site_root;
     Ok(actix_files::NamedFile::open(format!(
-        "{site_root}/favicon.ico"
+        "{site_root}/favicon.png"
     ))?)
 }
 

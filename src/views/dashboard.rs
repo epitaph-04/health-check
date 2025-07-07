@@ -1,5 +1,6 @@
 use chrono::Utc;
 use leptos::prelude::*;
+use crate::types::{Alert, AlertLevel, CheckStatus, HealthCheckStatus, ServiceHealthCheckInfo, ServiceType};
 
 #[component]
 pub fn Dashboard() -> impl IntoView {
@@ -9,6 +10,65 @@ pub fn Dashboard() -> impl IntoView {
     let (degradedCount, _setDegradedCount) = signal(0);
     let (criticalCount, _setCriticalCount) = signal(0);
     let (healthScore, _setHealthScore) = signal(100);
+    let (services, _setServices) = signal(vec![
+        ServiceHealthCheckInfo{
+            name: "Google".to_string(),
+            url: "https://google.com".to_string(),
+            service_type: ServiceType::Http,
+            interval_seconds: 30,
+            latest_status: HealthCheckStatus{
+                status: CheckStatus::Healthy,
+                status_message: "Ok".to_string(),
+                response_time: 21,
+                timestamp: Utc::now(),
+            },
+        },
+        ServiceHealthCheckInfo{
+            name: "Facebook".to_string(),
+            url: "https://facebook.com".to_string(),
+            service_type: ServiceType::Http,
+            interval_seconds: 30,
+            latest_status: HealthCheckStatus{
+                status: CheckStatus::Degraded,
+                status_message: "Ok".to_string(),
+                response_time: 2100,
+                timestamp: Utc::now(),
+            },
+        },
+        ServiceHealthCheckInfo{
+            name: "Instagram".to_string(),
+            url: "https://instagram.com".to_string(),
+            service_type: ServiceType::Http,
+            interval_seconds: 30,
+            latest_status: HealthCheckStatus{
+                status: CheckStatus::Unhealthy,
+                status_message: "Internal error".to_string(),
+                response_time: 21,
+                timestamp: Utc::now(),
+            },
+        }
+    ]);
+    let (recentAlerts, _setRecentAlerts) = signal(vec![
+        Alert{
+            service_name: "Instagram".to_string(),
+            level: AlertLevel::Warning,
+            message: "Cannot reach".to_string(),
+            timestamp: Utc::now(),
+        },
+        Alert{
+            service_name: "Facebook".to_string(),
+            level: AlertLevel::Critical,
+            message: "Service unreachable".to_string(),
+            timestamp: Utc::now(),
+        },
+    ]);
+
+    let get_status_color = |status: CheckStatus| match status {
+        CheckStatus::Healthy => "bg-green-400",
+        CheckStatus::Degraded => "bg-orange-400",
+        CheckStatus::Unhealthy => "bg-red-400",
+        _ => "bg-gray-400",
+    };
 
     view! {
         <div class="min-h-screen bg-white-50 p-6 rounded-xl shadow-md">
@@ -38,7 +98,6 @@ pub fn Dashboard() -> impl IntoView {
                     </div>
                 </div>
             </div>
-
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="bg-gray-700 rounded-lg shadow p-6">
@@ -70,7 +129,6 @@ pub fn Dashboard() -> impl IntoView {
                             </div>
                         </div>
                     </div>
-
                     <div class="bg-gray-700 rounded-lg shadow p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -100,7 +158,6 @@ pub fn Dashboard() -> impl IntoView {
                             </div>
                         </div>
                     </div>
-
                     <div class="bg-gray-700 rounded-lg shadow p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -130,7 +187,6 @@ pub fn Dashboard() -> impl IntoView {
                             </div>
                         </div>
                     </div>
-
                     <div class="bg-gray-700 rounded-lg shadow p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -161,94 +217,150 @@ pub fn Dashboard() -> impl IntoView {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-2 bg-gray-700 rounded-xl p-4">
-                    <h3 class="font-semibold mb-4 text-white">Services Status</h3>
-                    <ul class="divide-y divide-gray-600">
-                        <li class="flex justify-between py-2 items-center">
-                            <div class="flex items-center gap-2">
-                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                <div>
-                                    <div class="font-medium">CF Backend</div>
-                                    <div class="text-sm text-gray-400">Http</div>
-                                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <div class="bg-gray-700 shadow rounded-lg">
+                            <div class="px-6 py-4 border-b border-white-200">
+                                <h3 class="text-lg font-medium text-white-900">Services Status</h3>
                             </div>
-                            <div class="text-right text-gray-300 text-sm">
-                                <div>229 ms</div>
-                                <div>20:29</div>
+                            <div class="divide-y divide-white-200">
+                                <For
+                                    each=move || services.get().into_iter().take(10)
+                                    key=|service| service.name.clone()
+                                    children=move |service| {
+                                        view! {
+                                            <div
+                                                class="px-6 py-4 hover:bg-white-50 cursor-pointer"
+                                                on:click=move |_| {}
+                                            >
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0">
+                                                            <div class=format!(
+                                                                "w-3 h-3 rounded-full {}",
+                                                                get_status_color(service.latest_status.status),
+                                                            )></div>
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <p class="text-sm font-medium text-white-900">
+                                                                {service.name}
+                                                            </p>
+                                                            <p class="text-sm text-white-500">
+                                                                {format!("{:?}", service.service_type)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <p class="text-sm font-medium text-white-900">
+                                                            {format!("{} ms", service.latest_status.response_time)}
+                                                        </p>
+                                                        <p class="text-sm text-white-500">
+                                                            {service
+                                                                .latest_status
+                                                                .timestamp
+                                                                .format("%H:%M:%S")
+                                                                .to_string()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                />
                             </div>
-                        </li>
-                        <li class="flex justify-between py-2 items-center">
-                            <div class="flex items-center gap-2">
-                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                <div>
-                                    <div class="font-medium">CF Scheduler</div>
-                                    <div class="text-sm text-gray-400">Http</div>
-                                </div>
+                            <div class="px-6 py-3 border-t border-white-200">
+                                <a
+                                    href="/services"
+                                    class="text-sm font-medium text-blue-600 hover:text-blue-500"
+                                >
+                                    "View all services →"
+                                </a>
                             </div>
-                            <div class="text-right text-gray-300 text-sm">
-                                <div>556 ms</div>
-                                <div>20:29</div>
-                            </div>
-                        </li>
-                        <li class="flex justify-between py-2 items-center">
-                            <div class="flex items-center gap-2">
-                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                <div>
-                                    <div class="font-medium">Audit Logger</div>
-                                    <div class="text-sm text-gray-400">Http</div>
-                                </div>
-                            </div>
-                            <div class="text-right text-gray-300 text-sm">
-                                <div>839 ms</div>
-                                <div>20:29</div>
-                            </div>
-                        </li>
-                        <li class="flex justify-between py-2 items-center">
-                            <div class="flex items-center gap-2">
-                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                <div>
-                                    <div class="font-medium">MAF Notifier</div>
-                                    <div class="text-sm text-gray-400">Http</div>
-                                </div>
-                            </div>
-                            <div class="text-right text-gray-300 text-sm">
-                                <div>546 ms</div>
-                                <div>20:29</div>
-                            </div>
-                        </li>
-                    </ul>
-                    <a href="#" class="text-blue-400 text-sm mt-3 inline-block">
-                        "View all services →"
-                    </a>
-                </div>
-
-                <div class="flex flex-col gap-6">
-                    <div class="bg-gray-700 p-4 rounded-xl">
-                        <h3 class="font-semibold mb-4 text-white">Quick Actions</h3>
-                        <div class="flex flex-col gap-2">
-                            <button class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded">
-                                View Analytics
-                            </button>
-                            <button class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded border border-gray-600">
-                                Manage Alerts
-                            </button>
-                            <button class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded border border-gray-600">
-                                View Dependencies
-                            </button>
                         </div>
                     </div>
-
-                    <div class="bg-gray-700 p-4 rounded-xl">
-                        <h3 class="font-semibold mb-2 text-white">Recent Alerts</h3>
-                        <p class="text-sm text-gray-400">No recent alerts</p>
-                    </div>
-
-                    <div class="bg-gray-700 p-4 rounded-xl">
-                        <h3 class="font-semibold mb-2 text-white">Health Trend</h3>
-                        <div class="h-20 flex items-center justify-center text-gray-500 text-sm"></div>
+                    <div class="space-y-6">
+                        <div class="bg-gray-700 shadow rounded-lg">
+                            <div class="px-6 py-4 border-b border-white-200">
+                                <h3 class="text-lg font-medium text-white-900">Quick Actions</h3>
+                            </div>
+                            <div class="px-6 py-4 space-y-3">
+                                <button
+                                    on:click=move |_| {}
+                                    class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray bg-blue-600 hover:bg-blue-700"
+                                >
+                                    View Analytics
+                                </button>
+                                <button
+                                    on:click=move |_| {}
+                                    class="w-full flex items-center justify-center px-4 py-2 border border-white-300 text-sm font-medium rounded-md text-white-700 bg-gray hover:bg-white-50"
+                                >
+                                    Manage Alerts
+                                </button>
+                                <button
+                                    on:click=move |_| {}
+                                    class="w-full flex items-center justify-center px-4 py-2 border border-white-300 text-sm font-medium rounded-md text-white-700 bg-gray hover:bg-white-50"
+                                >
+                                    View Dependencies
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-700 shadow rounded-lg">
+                            <div class="px-6 py-4 border-b border-white-200">
+                                <h3 class="text-lg font-medium text-white-900">Recent Alerts</h3>
+                            </div>
+                            <div class="px-6 py-4">
+                                {move || {
+                                    let get_alert_color = |level: AlertLevel| match level {
+                                        AlertLevel::Critical => "bg-red-500",
+                                        AlertLevel::Warning => "bg-orange-400",
+                                        AlertLevel::Info => "bg-blue-400",
+                                    };
+                                    if recentAlerts.with(|alerts| alerts.is_empty()) {
+                                        view! {
+                                            <p class="text-sm text-white-500">"No recent alerts"</p>
+                                        }
+                                            .into_any()
+                                    } else {
+                                        view! {
+                                            <For
+                                                each=move || recentAlerts.get().into_iter().take(5)
+                                                key=|alert| alert.service_name.clone()
+                                                children=move |alert| {
+                                                    view! {
+                                                        <div class="flex items-start space-x-3">
+                                                            <div class="flex-shrink-0">
+                                                                <div class=format!(
+                                                                    "w-2 h-2 rounded-full {} mt-2",
+                                                                    get_alert_color(alert.level),
+                                                                )></div>
+                                                            </div>
+                                                            <div class="min-w-0 flex-1">
+                                                                <p class="text-sm font-medium text-white-900">
+                                                                    {alert.service_name}
+                                                                </p>
+                                                                <p class="text-sm text-white-500">{alert.message}</p>
+                                                                <p class="text-xs text-white-400">
+                                                                    {alert.timestamp.format("%H:%M:%S").to_string()}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                }
+                                            />
+                                        }
+                                            .into_any()
+                                    }
+                                }}
+                            </div>
+                        </div>
+                        <div class="bg-gray-700 shadow rounded-lg">
+                            <div class="px-6 py-4 border-b border-white-200">
+                                <h3 class="text-lg font-medium text-white-900">Health Trend</h3>
+                            </div>
+                            <div class="px-6 py-4">
+                                <canvas id="healthTrendChart" width="300" height="200"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

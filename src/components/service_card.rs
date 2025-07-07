@@ -8,7 +8,8 @@ pub fn ServiceCard(service_info: ReadSignal<ServiceHealthCheckInfo>) -> impl Int
     let color = match info.latest_status.status {
         CheckStatus::Healthy => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-green-500/10 border-green-500/30 text-green-400 mb-1",
         CheckStatus::Degraded => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-orange-500/10 border-orange-500/30 text-orange-400 mb-1",
-        CheckStatus::Unhealthy => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-red-500/10 border-red-500/30 text-red-400 mb-1"
+        CheckStatus::Unhealthy => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-red-500/10 border-red-500/30 text-red-400 mb-1",
+        CheckStatus::Unknown => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-gray-500/10 border-gray-500/30 text-gray-400 mb-1"
     };
     view! {
         <div class=match info.latest_status.status {
@@ -20,6 +21,9 @@ pub fn ServiceCard(service_info: ReadSignal<ServiceHealthCheckInfo>) -> impl Int
             }
             CheckStatus::Unhealthy => {
                 "service-card rounded-lg shadow-lg overflow-hidden bg-red-500/10 border-red-500 border flex flex-col"
+            }
+            CheckStatus::Unknown => {
+                "service-card rounded-lg shadow-lg overflow-hidden bg-gray-500/10 border-gray-500 border flex flex-col"
             }
         }>
             <div class="p-3 sm:p-4 flex-grow">
@@ -205,6 +209,15 @@ fn CardHeader(status: CheckStatus, title: String) -> impl IntoView {
                 <div class="ml-2 text-sm font-medium text-red-400">{status.to_string()}</div>
             </div>
             <h3 class="ml-2 text-base sm:text-lg font-semibold truncate text-red-400" title=title>
+                {title.clone()}
+            </h3>
+        }.into_any(),
+        CheckStatus::Unknown => view! {
+            <div class="flex items-center">
+                {unhealthy_icon}
+                <div class="ml-2 text-sm font-medium text-gray-400">{status.to_string()}</div>
+            </div>
+            <h3 class="ml-2 text-base sm:text-lg font-semibold truncate text-gray-400" title=title>
                 {title.clone()}
             </h3>
         }.into_any(),

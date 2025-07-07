@@ -8,6 +8,7 @@ pub enum CheckStatus {
     Healthy,
     Degraded,
     Unhealthy,
+    Unknown,
 }
 impl Display for CheckStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -15,6 +16,7 @@ impl Display for CheckStatus {
             CheckStatus::Healthy => write!(f, "Healthy"),
             CheckStatus::Degraded => write!(f, "Degraded"),
             CheckStatus::Unhealthy => write!(f, "Unhealthy"),
+            CheckStatus::Unknown => write!(f, "Unknown"),
         }
     }
 }
@@ -25,6 +27,17 @@ pub struct HealthCheckStatus {
     pub response_time: u128,
     pub timestamp: DateTime<Utc>,
 }
+impl Default for HealthCheckStatus {
+    fn default() -> Self {
+        HealthCheckStatus{
+            status: CheckStatus::Unknown,
+            response_time: 0,
+            status_message: "unknown".to_string(),
+            timestamp: Utc::now()
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ServiceHealthCheckInfo {
     pub name: String,

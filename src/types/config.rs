@@ -25,7 +25,7 @@ pub mod configs {
         pub url: String,
         pub check_interval_seconds: Option<u16>,
         pub timeout_seconds: Option<u64>,
-        pub response_code: Option<u16>,
+        pub response_code: Option<u64>,
         #[serde(rename = "type")]
         pub service_type: ServiceType,
         pub headers: Vec<String>,

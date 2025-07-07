@@ -1,5 +1,6 @@
 #[cfg(feature = "ssr")]
 pub mod health_check_actors {
+    use std::collections::VecDeque;
     use crate::actors::broadcaster::broadcast_actor::{
         BroadcastActor, HealthCheckInfo,
     };
@@ -15,15 +16,26 @@ pub mod health_check_actors {
     use tokio_stream::StreamExt;
 
     #[derive(Message)]
-    #[rtype(result = "Result<(), anyhow::Error>")]
+    #[rtype(result = "()")]
     struct Check;
+
+    #[derive(Message)]
+    #[rtype(result = "Result<HealthCheckInfo, anyhow::Error>")]
+    pub struct CheckResult;
+
+    #[derive(Message)]
+    #[rtype(result = "()")]
+    struct HealthCheckResult {
+        status: HealthCheckStatus,
+    }
 
     pub struct HttpHealthCheckActor {
         name: String,
         url: String,
         interval_seconds: u64,
         timeout: u64,
-        response_code: u16,
+        capacity: u64,
+        historical_status: VecDeque<HealthCheckStatus>,
         broadcast_actor: Arc<Addr<BroadcastActor>>,
     }
 
@@ -33,7 +45,7 @@ pub mod health_check_actors {
             url: String,
             interval_seconds: u64,
             timeout: u64,
-            response_code: u16,
+            capacity: u64,
             broadcast_actor: Arc<Addr<BroadcastActor>>,
         ) -> Self {
             HttpHealthCheckActor {
@@ -41,7 +53,8 @@ pub mod health_check_actors {
                 url,
                 interval_seconds,
                 timeout,
-                response_code,
+                capacity,
+                historical_status: VecDeque::new(),
                 broadcast_actor,
             }
         }
@@ -74,11 +87,10 @@ pub mod health_check_actors {
 
     impl StreamHandler<Check> for HttpHealthCheckActor {
         fn handle(&mut self, _msg: Check, ctx: &mut Context<Self>) {
-            let broadcast_actor = self.broadcast_actor.clone();
             let url = self.url.clone();
             let name = self.name.clone();
             let timeout = self.timeout;
-            let interval = self.interval_seconds;
+            let self_addr = ctx.address();
 
             let fut = async move {
                 let start = Instant::now();
@@ -104,7 +116,7 @@ pub mod health_check_actors {
                                 HealthCheckStatus {
                                     status: CheckStatus::from(status),
                                     status_message,
-                                    response_time: start.elapsed().as_millis(),
+                                    response_time: elapsed,
                                     timestamp: Utc::now(),
                                 }
                             }
@@ -130,15 +142,45 @@ pub mod health_check_actors {
                         }
                     }
                 };
-                broadcast_actor.do_send(HealthCheckInfo {
-                    name,
-                    service_type: ServiceType::Http,
-                    url,
-                    interval_seconds: interval,
-                    latest_status: health_status,
-                });
+                self_addr.do_send(HealthCheckResult { status: health_status });
             };
             ctx.spawn(fut.into_actor(self));
+        }
+    }
+
+    impl Handler<HealthCheckResult> for HttpHealthCheckActor {
+        type Result = ();
+
+        fn handle(&mut self, msg: HealthCheckResult, _ctx: &mut Context<Self>) {
+            if self.historical_status.len() >= self.capacity as usize {
+                self.historical_status.pop_back();
+            }
+            self.historical_status.push_front(msg.status.clone());
+
+            let service_message = HealthCheckInfo {
+                name: self.name.clone(),
+                url: self.url.clone(),
+                service_type: ServiceType::Http,
+                interval_seconds: self.interval_seconds,
+                latest_status: msg.status,
+                historic_status: self.historical_status.clone().into(),
+            };
+            self.broadcast_actor.do_send(service_message);
+        }
+    }
+
+    impl Handler<CheckResult> for HttpHealthCheckActor {
+        type Result = Result<HealthCheckInfo>;
+
+        fn handle(&mut self, _msg: CheckResult, _ctx: &mut Context<Self>) -> Self::Result {
+            Ok(HealthCheckInfo {
+                name: self.name.clone(),
+                url: self.url.clone(),
+                interval_seconds: self.interval_seconds,
+                service_type: ServiceType::Http,
+                latest_status: self.historical_status.front().map_or(HealthCheckStatus::default(), |s| s.clone()),
+                historic_status: self.historical_status.clone().into(),
+            })
         }
     }
 
