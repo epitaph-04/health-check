@@ -36,7 +36,6 @@ async fn main() -> std::io::Result<()> {
             service.timeout_seconds
                 .map_or(config.global.timeout_seconds, |v| v),
             service.response_code.map_or(200, |v| v),
-            service.headers,
             broadcast_actor.clone(),
         ));
     }

@@ -24,7 +24,6 @@ pub mod health_check_actors {
         interval_seconds: u64,
         timeout: u64,
         response_code: u16,
-        headers: Vec<String>,
         broadcast_actor: Arc<Addr<BroadcastActor>>,
     }
 
@@ -35,7 +34,6 @@ pub mod health_check_actors {
             interval_seconds: u64,
             timeout: u64,
             response_code: u16,
-            headers: Vec<String>,
             broadcast_actor: Arc<Addr<BroadcastActor>>,
         ) -> Self {
             HttpHealthCheckActor {
@@ -44,7 +42,6 @@ pub mod health_check_actors {
                 interval_seconds,
                 timeout,
                 response_code,
-                headers,
                 broadcast_actor,
             }
         }

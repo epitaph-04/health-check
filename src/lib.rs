@@ -4,6 +4,8 @@ pub mod app;
 #[cfg(feature = "ssr")]
 pub mod api;
 pub mod types;
+mod views;
+mod components;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
