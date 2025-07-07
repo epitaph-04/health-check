@@ -1,45 +1,55 @@
-use chrono::Utc;
+use std::collections::HashMap;
+use futures_util::StreamExt;
+use gloo::net::eventsource::futures::EventSource;
 use leptos::prelude::*;
+use leptos::task::spawn_local;
+use log::{error, info};
 use crate::components::ServiceCard;
-use crate::types::{CheckStatus, HealthCheckStatus, ServiceHealthCheckInfo, ServiceType};
+use crate::types::ServiceHealthCheckInfo;
 
 #[component]
 pub fn Services() -> impl IntoView {
-    let (service1, _) = signal(ServiceHealthCheckInfo{
-        name: "Google".to_string(),
-        url: "https://google.com".to_string(),
-        service_type: ServiceType::Http,
-        interval_seconds: 30,
-        latest_status: HealthCheckStatus{
-            status: CheckStatus::Healthy,
-            status_message: "Ok".to_string(),
-            response_time: 21,
-            timestamp: Utc::now(),
-        },
-    });
-    let (service2, _) = signal(ServiceHealthCheckInfo{
-        name: "Facebook".to_string(),
-        url: "https://facebook.com".to_string(),
-        service_type: ServiceType::Http,
-        interval_seconds: 30,
-        latest_status: HealthCheckStatus{
-            status: CheckStatus::Degraded,
-            status_message: "Ok".to_string(),
-            response_time: 2100,
-            timestamp: Utc::now(),
-        },
-    });
-    let (service3, _) = signal(ServiceHealthCheckInfo{
-        name: "Instagram".to_string(),
-        url: "https://instagram.com".to_string(),
-        service_type: ServiceType::Http,
-        interval_seconds: 30,
-        latest_status: HealthCheckStatus{
-            status: CheckStatus::Unhealthy,
-            status_message: "Internal error".to_string(),
-            response_time: 21,
-            timestamp: Utc::now(),
-        },
+    let (servicesMap, setServicesMap) = signal(HashMap::<String, RwSignal<ServiceHealthCheckInfo>>::new());
+    Effect::new(move |_| {
+        let mut event_source = match EventSource::new("/api/events") {
+            Ok(es) => {
+                info!("SSE connection established.");
+                es
+            }
+            Err(e) => {
+                error!("Failed to connect to SSE endpoint: {:?}", e);
+                return;
+            }
+        };
+        let mut event_stream = match event_source.subscribe("sse") {
+            Ok(stream) => stream,
+            Err(e) => {
+                error!("Failed to subscribe to 'sse' event: {:?}", e);
+                return;
+            }
+        };
+        spawn_local(async move {
+            while let Some(Ok((_, msg))) = event_stream.next().await {
+                if let Some(data_str) = msg.data().as_string() {
+                    match serde_json::from_str::<ServiceHealthCheckInfo>(&data_str) {
+                        Ok(new_message) => {
+                            setServicesMap.update(|s| {
+                                if let Some(service_signal) = s.get(&new_message.name) {
+                                    service_signal.set(new_message);
+                                } else {
+                                    s.insert(new_message.name.clone(), RwSignal::new(new_message));
+                                }
+                            });
+                        },
+                        Err(e) => {
+                            error!("Failed to deserialize message: {:?}, error: {}", data_str, e);
+                        }
+                    }
+                }
+            }
+            info!("SSE connection closed.");
+            event_source.close();
+        });
     });
     view! {
         <div class="mb-6">
@@ -50,9 +60,13 @@ pub fn Services() -> impl IntoView {
             id="dashboardView"
             class="view-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
         >
-            <ServiceCard service_info=service1 />
-            <ServiceCard service_info=service2 />
-            <ServiceCard service_info=service3 />
+            <For
+                each=move || servicesMap.get()
+                key=|state| state.0.clone()
+                children=move |(_, val)| {
+                    view! { <ServiceCard info={val} /> }
+                }
+            />
         </div>
     }
 }

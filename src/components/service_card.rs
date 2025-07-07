@@ -1,18 +1,21 @@
 use leptos::prelude::*;
-use leptos::prelude::ReadSignal;
 use crate::types::{CheckStatus, ServiceHealthCheckInfo};
 
 #[component]
-pub fn ServiceCard(service_info: ReadSignal<ServiceHealthCheckInfo>) -> impl IntoView {
-    let info = service_info.get();
-    let color = match info.latest_status.status {
+pub fn ServiceCard(info: RwSignal<ServiceHealthCheckInfo>) -> impl IntoView {
+    let (status, _) = signal(info.get().latest_status.status);
+    let (status_message, _) = signal(info.get().latest_status.status_message);
+    let (response_time, _) = signal(info.get().latest_status.response_time);
+    let (timestamp, _) = signal(info.get().latest_status.timestamp);
+
+    let color = match status.get() {
         CheckStatus::Healthy => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-green-500/10 border-green-500/30 text-green-400 mb-1",
         CheckStatus::Degraded => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-orange-500/10 border-orange-500/30 text-orange-400 mb-1",
         CheckStatus::Unhealthy => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-red-500/10 border-red-500/30 text-red-400 mb-1",
         CheckStatus::Unknown => "text-sm font-medium px-2 py-0.5 rounded inline-block bg-gray-500/10 border-gray-500/30 text-gray-400 mb-1"
     };
     view! {
-        <div class=match info.latest_status.status {
+        <div class=match status.get() {
             CheckStatus::Healthy => {
                 "service-card rounded-lg shadow-lg overflow-hidden bg-green-500/10 border-green-500 border flex flex-col"
             }
@@ -30,8 +33,8 @@ pub fn ServiceCard(service_info: ReadSignal<ServiceHealthCheckInfo>) -> impl Int
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center min-w-0">
                         <CardHeader
-                            status=info.clone().latest_status.status
-                            title=info.clone().name
+                            status=status.get()
+                            title=info.get().name
                         />
                     </div>
                     <div class="flex space-x-1 flex-shrink-0">
@@ -70,13 +73,13 @@ pub fn ServiceCard(service_info: ReadSignal<ServiceHealthCheckInfo>) -> impl Int
                         </button>
                     </div>
                 </div>
-                <p class="text-xs text-slate-400 truncate mb-1" title=info.url>
-                    <span class="font-semibold">{info.service_type.to_string()}@</span>
-                    {info.clone().url}
+                <p class="text-xs text-slate-400 truncate mb-1" title=info.get().url>
+                    <span class="font-semibold">{info.get().service_type.to_string()}@</span>
+                    {info.get().url}
                 </p>
-                <div class=color>{info.latest_status.status.to_string()}</div>
+                <div class=color>{status.get().to_string()}</div>
                 <p class="text-xs text-slate-400 mt-1">
-                    Status : {info.latest_status.status_message}
+                    Status : {status_message.get()}
                 </p>
                 <div class="flex justify-between text-xs text-slate-400 mt-2">
                     <span class="icon-text-align">
@@ -95,7 +98,7 @@ pub fn ServiceCard(service_info: ReadSignal<ServiceHealthCheckInfo>) -> impl Int
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="12 6 12 12 16 14" />
                         </svg>
-                        {info.latest_status.response_time}
+                        {response_time.get()}
                         ms
                     </span>
                     <span class="icon-text-align">
@@ -116,10 +119,10 @@ pub fn ServiceCard(service_info: ReadSignal<ServiceHealthCheckInfo>) -> impl Int
                             <line x1="8" y1="2" x2="8" y2="6" />
                             <line x1="3" y1="10" x2="21" y2="10" />
                         </svg>
-                        {info.latest_status.timestamp.format("%H:%M:%S").to_string()}
+                        {timestamp.get().format("%H:%M:%S").to_string()}
                     </span>
                 </div>
-                <p class="text-xs text-slate-400 mt-1">Interval : {info.interval_seconds}s</p>
+                <p class="text-xs text-slate-400 mt-1">Interval : {info.get().interval_seconds}s</p>
             </div>
         </div>
     }

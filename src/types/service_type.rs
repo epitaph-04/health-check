@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ServiceType {
     #[serde(rename = "http")]
     Http,

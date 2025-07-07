@@ -1,53 +1,21 @@
+use std::collections::HashMap;
 use chrono::Utc;
+use futures_util::StreamExt;
+use gloo::net::eventsource::futures::EventSource;
 use leptos::prelude::*;
-use crate::types::{Alert, AlertLevel, CheckStatus, HealthCheckStatus, ServiceHealthCheckInfo, ServiceType};
+use leptos::task::spawn_local;
+use log::{error, info};
+use crate::types::{Alert, AlertLevel, CheckStatus, ServiceHealthCheckInfo};
 
 #[component]
 pub fn Dashboard() -> impl IntoView {
-    let (isConnected, _setIsConnected) = signal(false);
+    let (isConnected, setIsConnected) = signal(false);
     let (lastUpdated, _setLastUpdated) = signal(Utc::now());
     let (healthyCount, _setHealthyCount) = signal(4);
     let (degradedCount, _setDegradedCount) = signal(0);
     let (criticalCount, _setCriticalCount) = signal(0);
     let (healthScore, _setHealthScore) = signal(100);
-    let (services, _setServices) = signal(vec![
-        ServiceHealthCheckInfo{
-            name: "Google".to_string(),
-            url: "https://google.com".to_string(),
-            service_type: ServiceType::Http,
-            interval_seconds: 30,
-            latest_status: HealthCheckStatus{
-                status: CheckStatus::Healthy,
-                status_message: "Ok".to_string(),
-                response_time: 21,
-                timestamp: Utc::now(),
-            },
-        },
-        ServiceHealthCheckInfo{
-            name: "Facebook".to_string(),
-            url: "https://facebook.com".to_string(),
-            service_type: ServiceType::Http,
-            interval_seconds: 30,
-            latest_status: HealthCheckStatus{
-                status: CheckStatus::Degraded,
-                status_message: "Ok".to_string(),
-                response_time: 2100,
-                timestamp: Utc::now(),
-            },
-        },
-        ServiceHealthCheckInfo{
-            name: "Instagram".to_string(),
-            url: "https://instagram.com".to_string(),
-            service_type: ServiceType::Http,
-            interval_seconds: 30,
-            latest_status: HealthCheckStatus{
-                status: CheckStatus::Unhealthy,
-                status_message: "Internal error".to_string(),
-                response_time: 21,
-                timestamp: Utc::now(),
-            },
-        }
-    ]);
+    let (services, setServices) = signal(HashMap::<String, RwSignal<ServiceHealthCheckInfo>>::new());
     let (recentAlerts, _setRecentAlerts) = signal(vec![
         Alert{
             service_name: "Instagram".to_string(),
@@ -62,6 +30,50 @@ pub fn Dashboard() -> impl IntoView {
             timestamp: Utc::now(),
         },
     ]);
+    Effect::new(move |_| {
+        let mut event_source = match EventSource::new("/api/events") {
+            Ok(es) => {
+                info!("SSE connection established.");
+                *setIsConnected.write() = true;
+                es
+            }
+            Err(e) => {
+                error!("Failed to connect to SSE endpoint: {:?}", e);
+                *setIsConnected.write() = false;
+                return;
+            }
+        };
+        let mut event_stream = match event_source.subscribe("sse") {
+            Ok(stream) => stream,
+            Err(e) => {
+                error!("Failed to subscribe to 'sse' event: {:?}", e);
+                return;
+            }
+        };
+        spawn_local(async move {
+            while let Some(Ok((_, msg))) = event_stream.next().await {
+                if let Some(data_str) = msg.data().as_string() {
+                    match serde_json::from_str::<ServiceHealthCheckInfo>(&data_str) {
+                        Ok(new_message) => {
+                            setServices.update(|s| {
+                                if let Some(service_signal) = s.get(&new_message.name) {
+                                    service_signal.set(new_message);
+                                } else {
+                                    s.insert(new_message.name.clone(), RwSignal::new(new_message));
+                                }
+                            });
+                        },
+                        Err(e) => {
+                            error!("Failed to deserialize message: {:?}, error: {}", data_str, e);
+                        }
+                    }
+                }
+            }
+            info!("SSE connection closed.");
+            event_source.close();
+            *setIsConnected.write() = false;
+        });
+    });
 
     let get_status_color = |status: CheckStatus| match status {
         CheckStatus::Healthy => "bg-green-400",
@@ -78,13 +90,13 @@ pub fn Dashboard() -> impl IntoView {
                         <h1 class="text-3xl font-bold text-white-900">System Health Dashboard</h1>
                         <div class="flex items-center space-x-4">
                             <div class="flex items-center space-x-2">
-                                <div class=if isConnected.get() {
+                                <div class=move || if isConnected.get() {
                                     "w-3 h-3 rounded-full if bg-green-400"
                                 } else {
                                     "w-3 h-3 rounded-full if bg-red-400"
                                 }></div>
                                 <span class="text-sm text-white-600">
-                                    {if isConnected.get() {
+                                    {move || if isConnected.get() {
                                         " Connected "
                                     } else {
                                         " Disconnected "
@@ -226,8 +238,8 @@ pub fn Dashboard() -> impl IntoView {
                             <div class="divide-y divide-white-200">
                                 <For
                                     each=move || services.get().into_iter().take(10)
-                                    key=|service| service.name.clone()
-                                    children=move |service| {
+                                    key=|service| service.0.clone()
+                                    children=move |(_, service)| {
                                         view! {
                                             <div
                                                 class="px-6 py-4 hover:bg-white-50 cursor-pointer"
@@ -236,26 +248,27 @@ pub fn Dashboard() -> impl IntoView {
                                                 <div class="flex items-center justify-between">
                                                     <div class="flex items-center">
                                                         <div class="flex-shrink-0">
-                                                            <div class=format!(
+                                                            <div class=move || format!(
                                                                 "w-3 h-3 rounded-full {}",
-                                                                get_status_color(service.latest_status.status),
+                                                                get_status_color(service.get().latest_status.status),
                                                             )></div>
                                                         </div>
                                                         <div class="ml-4">
                                                             <p class="text-sm font-medium text-white-900">
-                                                                {service.name}
+                                                                {service.get().name}
                                                             </p>
                                                             <p class="text-sm text-white-500">
-                                                                {format!("{:?}", service.service_type)}
+                                                                {format!("{:?}", service.get().service_type)}
                                                             </p>
                                                         </div>
                                                     </div>
                                                     <div class="text-right">
                                                         <p class="text-sm font-medium text-white-900">
-                                                            {format!("{} ms", service.latest_status.response_time)}
+                                                            {move || format!("{} ms", service.get().latest_status.response_time)}
                                                         </p>
                                                         <p class="text-sm text-white-500">
-                                                            {service
+                                                            {move || service
+                                                                .get()
                                                                 .latest_status
                                                                 .timestamp
                                                                 .format("%H:%M:%S")
@@ -351,14 +364,6 @@ pub fn Dashboard() -> impl IntoView {
                                             .into_any()
                                     }
                                 }}
-                            </div>
-                        </div>
-                        <div class="bg-gray-700 shadow rounded-lg">
-                            <div class="px-6 py-4 border-b border-white-200">
-                                <h3 class="text-lg font-medium text-white-900">Health Trend</h3>
-                            </div>
-                            <div class="px-6 py-4">
-                                <canvas id="healthTrendChart" width="300" height="200"></canvas>
                             </div>
                         </div>
                     </div>

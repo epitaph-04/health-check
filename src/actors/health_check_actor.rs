@@ -10,7 +10,6 @@ pub mod health_check_actors {
     use chrono::Utc;
     use log::{info, warn, error};
     use reqwest::StatusCode;
-    use std::sync::Arc;
     use std::time::{Duration, Instant};
     use tokio_stream::wrappers::IntervalStream;
     use tokio_stream::StreamExt;
@@ -36,7 +35,7 @@ pub mod health_check_actors {
         timeout: u64,
         capacity: u64,
         historical_status: VecDeque<HealthCheckStatus>,
-        broadcast_actor: Arc<Addr<BroadcastActor>>,
+        broadcast_actor: Addr<BroadcastActor>,
     }
 
     impl HttpHealthCheckActor {
@@ -46,7 +45,7 @@ pub mod health_check_actors {
             interval_seconds: u64,
             timeout: u64,
             capacity: u64,
-            broadcast_actor: Arc<Addr<BroadcastActor>>,
+            broadcast_actor: Addr<BroadcastActor>,
         ) -> Self {
             HttpHealthCheckActor {
                 name,
