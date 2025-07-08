@@ -14,15 +14,7 @@
   <component name="ChangeListManager">
     <list default="true" id="5e90b0a4-4ea0-4d46-95ce-aec394f24b8e" name="Changes" comment="update view">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.toml" beforeDir="false" afterPath="$PROJECT_DIR$/config.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/actors/health_check_actor.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/actors/health_check_actor.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/api.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/service_card.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/service_card.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/service_event.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/service_event.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/service_type.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/service_type.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/dashboard.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/dashboard.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/services.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/services.rs" afterDir="false" />
     </list>
@@ -60,27 +52,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.rust.reset.selective.auto.import": "true",
-    "git-widget-placeholder": "curr",
-    "last_opened_file_path": "/Users/mahassan2001/project/other/health-check",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
-    "org.rust.first.attach.projects": "true",
-    "settings.editor.selected.configurable": "language.rust.cargo.check",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;curr&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/mahassan2001/project/other/health-check&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.cargo.check&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -109,7 +101,9 @@
       <workItem from="1751184432359" duration="978000" />
       <workItem from="1751224962489" duration="3759000" />
       <workItem from="1751292434497" duration="43000" />
-      <workItem from="1751913347249" duration="9846000" />
+      <workItem from="1751913347249" duration="11147000" />
+      <workItem from="1751925131181" duration="2870000" />
+      <workItem from="1751967891622" duration="3572000" />
     </task>
     <task id="LOCAL-00001" summary="update view">
       <option name="closed" value="true" />
@@ -119,7 +113,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751896281147</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="update view">
+      <option name="closed" value="true" />
+      <created>1751924204402</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1751924204402</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

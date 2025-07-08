@@ -35,7 +35,7 @@ pub fn Services() -> impl IntoView {
                         Ok(new_message) => {
                             setServicesMap.update(|s| {
                                 if let Some(service_signal) = s.get(&new_message.name) {
-                                    service_signal.set(new_message);
+                                    *service_signal.write() = new_message;
                                 } else {
                                     s.insert(new_message.name.clone(), RwSignal::new(new_message));
                                 }
@@ -64,7 +64,7 @@ pub fn Services() -> impl IntoView {
                 each=move || servicesMap.get()
                 key=|state| state.0.clone()
                 children=move |(_, val)| {
-                    view! { <ServiceCard info={val} /> }
+                    view! { <ServiceCard info=val /> }
                 }
             />
         </div>

@@ -90,16 +90,20 @@ pub fn Dashboard() -> impl IntoView {
                         <h1 class="text-3xl font-bold text-white-900">System Health Dashboard</h1>
                         <div class="flex items-center space-x-4">
                             <div class="flex items-center space-x-2">
-                                <div class=move || if isConnected.get() {
-                                    "w-3 h-3 rounded-full if bg-green-400"
-                                } else {
-                                    "w-3 h-3 rounded-full if bg-red-400"
+                                <div class=move || {
+                                    if isConnected.get() {
+                                        "w-3 h-3 rounded-full if bg-green-400"
+                                    } else {
+                                        "w-3 h-3 rounded-full if bg-red-400"
+                                    }
                                 }></div>
                                 <span class="text-sm text-white-600">
-                                    {move || if isConnected.get() {
-                                        " Connected "
-                                    } else {
-                                        " Disconnected "
+                                    {move || {
+                                        if isConnected.get() {
+                                            " Connected "
+                                        } else {
+                                            " Disconnected "
+                                        }
                                     }}
                                 </span>
                             </div>
@@ -248,10 +252,12 @@ pub fn Dashboard() -> impl IntoView {
                                                 <div class="flex items-center justify-between">
                                                     <div class="flex items-center">
                                                         <div class="flex-shrink-0">
-                                                            <div class=move || format!(
-                                                                "w-3 h-3 rounded-full {}",
-                                                                get_status_color(service.get().latest_status.status),
-                                                            )></div>
+                                                            <div class=move || {
+                                                                format!(
+                                                                    "w-3 h-3 rounded-full {}",
+                                                                    get_status_color(service.get().latest_status.status),
+                                                                )
+                                                            }></div>
                                                         </div>
                                                         <div class="ml-4">
                                                             <p class="text-sm font-medium text-white-900">
@@ -264,15 +270,19 @@ pub fn Dashboard() -> impl IntoView {
                                                     </div>
                                                     <div class="text-right">
                                                         <p class="text-sm font-medium text-white-900">
-                                                            {move || format!("{} ms", service.get().latest_status.response_time)}
+                                                            {move || {
+                                                                format!("{} ms", service.get().latest_status.response_time)
+                                                            }}
                                                         </p>
                                                         <p class="text-sm text-white-500">
-                                                            {move || service
-                                                                .get()
-                                                                .latest_status
-                                                                .timestamp
-                                                                .format("%H:%M:%S")
-                                                                .to_string()}
+                                                            {move || {
+                                                                service
+                                                                    .get()
+                                                                    .latest_status
+                                                                    .timestamp
+                                                                    .format("%H:%M:%S")
+                                                                    .to_string()
+                                                            }}
                                                         </p>
                                                     </div>
                                                 </div>
