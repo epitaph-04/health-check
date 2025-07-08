@@ -8,21 +8,23 @@
       <package file="$PROJECT_DIR$">
         <enabledFeature name="default" />
         <enabledFeature name="hydrate" />
+        <enabledFeature name="ssr" />
       </package>
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5e90b0a4-4ea0-4d46-95ce-aec394f24b8e" name="Changes" comment="update view">
-      <change afterPath="$PROJECT_DIR$/src/components/nav_link.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/views/alerts.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/views/analytics.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/views/dependencies.rs" afterDir="false" />
+    <list default="true" id="5e90b0a4-4ea0-4d46-95ce-aec394f24b8e" name="Changes" comment="temp commit">
+      <change afterPath="$PROJECT_DIR$/src/components/alert_card.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/actors/broadcaster.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/actors/broadcaster.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/actors/health_check_actor.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/actors/health_check_actor.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/service_card.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/service_card.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/alert.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/alert.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/alerts.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/alerts.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/dashboard.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/dashboard.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/services.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/services.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,7 +113,7 @@
       <workItem from="1751925131181" duration="2870000" />
       <workItem from="1751967891622" duration="3572000" />
       <workItem from="1751985951690" duration="34000" />
-      <workItem from="1751999084379" duration="4399000" />
+      <workItem from="1751999084379" duration="5954000" />
     </task>
     <task id="LOCAL-00001" summary="update view">
       <option name="closed" value="true" />
@@ -137,7 +139,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751985976153</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="temp commit">
+      <option name="closed" value="true" />
+      <created>1752003697053</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1752003697053</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -168,6 +178,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="update view" />
-    <option name="LAST_COMMIT_MESSAGE" value="update view" />
+    <MESSAGE value="temp commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="temp commit" />
   </component>
 </project>

@@ -1,10 +1,11 @@
 #[cfg(feature = "ssr")]
 pub mod broadcast_actor {
-    use crate::types::{HealthCheckStatus, ServiceType};
+    use crate::types::{ServiceType};
     use actix::prelude::*;
     use log::info;
     use serde::{Deserialize, Serialize};
     use tokio::sync::broadcast;
+    use crate::types::service_event::HealthCheckStatus;
 
     #[derive(Message, Serialize, Deserialize, Clone)]
     #[rtype(result = "()")]

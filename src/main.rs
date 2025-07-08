@@ -13,7 +13,6 @@ async fn main() -> std::io::Result<()> {
     use health_check::actors::BroadcastActor;
     use health_check::actors::HttpHealthCheckActor;
     use health_check::app::*;
-    use health_check::types::ServiceConfiguration;
     use leptos::config::get_configuration;
     use leptos::prelude::*;
     use leptos_actix::{generate_route_list, LeptosRoutes};
@@ -22,6 +21,7 @@ async fn main() -> std::io::Result<()> {
     use tokio::sync::broadcast;
     use health_check::actors::HealthCheckInfo;
     use health_check::api::server_api::sse_handler;
+    use health_check::types::config::configs::ServiceConfiguration;
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 

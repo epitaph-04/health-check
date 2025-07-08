@@ -82,7 +82,8 @@ pub fn Dashboard() -> impl IntoView {
                                                     service_name: new_message.name.clone(),
                                                     level: AlertLevel::Warning,
                                                     message: new_message.latest_status.status_message.clone(),
-                                                    timestamp: new_message.latest_status.timestamp,
+                                                    timestamp: Utc::now(),
+                                                    details: None,
                                                 });
                                                 alerts.truncate(5);
                                             });
@@ -93,7 +94,8 @@ pub fn Dashboard() -> impl IntoView {
                                                     service_name: new_message.name.clone(),
                                                     level: AlertLevel::Critical,
                                                     message: new_message.latest_status.status_message.clone(),
-                                                    timestamp: new_message.latest_status.timestamp,
+                                                    timestamp: Utc::now(),
+                                                    details: None,
                                                 });
                                                 alerts.truncate(5);
                                             });
@@ -144,6 +146,7 @@ pub fn Dashboard() -> impl IntoView {
                                     } else {
                                         "w-3 h-3 rounded-full bg-red-400"
                                     }
+
                                 }></div>
                                 <span class="text-sm text-white-600">
                                     {move || {
@@ -397,7 +400,8 @@ pub fn Dashboard() -> impl IntoView {
                             <div class="px-6 py-4">
                                 {move || {
                                     let get_alert_color = |level: AlertLevel| match level {
-                                        AlertLevel::Critical => "bg-red-500",
+                                        AlertLevel::Critical => "bg-red-700",
+                                        AlertLevel::Error => "bg-red-500",
                                         AlertLevel::Warning => "bg-orange-400",
                                         AlertLevel::Info => "bg-blue-400",
                                     };

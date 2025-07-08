@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use crate::types::{CheckStatus, ServiceHealthCheckInfo};
+use crate::types::service_event::{CheckStatus, ServiceHealthCheckInfo};
 
 #[component]
 pub fn ServiceCard(info: RwSignal<ServiceHealthCheckInfo>) -> impl IntoView {

@@ -4,7 +4,7 @@ pub mod health_check_actors {
     use crate::actors::broadcaster::broadcast_actor::{
         BroadcastActor, HealthCheckInfo,
     };
-    use crate::types::{CheckStatus, HealthCheckStatus, ServiceType};
+    use crate::types::{CheckStatus, ServiceType};
     use actix::prelude::*;
     use anyhow::Result;
     use chrono::Utc;
@@ -13,6 +13,7 @@ pub mod health_check_actors {
     use std::time::{Duration, Instant};
     use tokio_stream::wrappers::IntervalStream;
     use tokio_stream::StreamExt;
+    use crate::types::service_event::HealthCheckStatus;
 
     #[derive(Message)]
     #[rtype(result = "()")]

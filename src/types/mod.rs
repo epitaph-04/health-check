@@ -1,11 +1,9 @@
+pub mod alert;
+pub mod config;
+pub mod service_event;
+pub mod service_type;
+pub use alert::{Alert, AlertLevel};
 #[cfg(feature = "ssr")]
-mod config;
-mod service_event;
-mod service_type;
-mod alert;
-
-pub use service_event::*;
-pub use service_type::*;
-pub use alert::*;
-#[cfg(feature = "ssr")]
-pub use config::configs::*;
+pub use config::configs::ServiceConfiguration as Config;
+pub use service_event::{CheckStatus, ServiceHealthCheckInfo};
+pub use service_type::ServiceType;
