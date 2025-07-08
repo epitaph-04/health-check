@@ -13,9 +13,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5e90b0a4-4ea0-4d46-95ce-aec394f24b8e" name="Changes" comment="update view">
+      <change afterPath="$PROJECT_DIR$/src/components/nav_link.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/views/alerts.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/views/analytics.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/views/dependencies.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/service_card.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/service_card.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/dashboard.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/dashboard.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/services.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/services.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -104,6 +110,8 @@
       <workItem from="1751913347249" duration="11147000" />
       <workItem from="1751925131181" duration="2870000" />
       <workItem from="1751967891622" duration="3572000" />
+      <workItem from="1751985951690" duration="34000" />
+      <workItem from="1751999084379" duration="4399000" />
     </task>
     <task id="LOCAL-00001" summary="update view">
       <option name="closed" value="true" />
@@ -121,7 +129,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751924204402</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="update view">
+      <option name="closed" value="true" />
+      <created>1751985976153</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1751985976153</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

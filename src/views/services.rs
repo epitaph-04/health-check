@@ -4,7 +4,7 @@ use gloo::net::eventsource::futures::EventSource;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{error, info};
-use crate::components::ServiceCard;
+use crate::components::service_card::ServiceCard;
 use crate::types::ServiceHealthCheckInfo;
 
 #[component]

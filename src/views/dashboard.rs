@@ -1,45 +1,57 @@
+use leptos::prelude::*;
+use leptos_router::hooks::use_navigate;
 use std::collections::HashMap;
 use chrono::Utc;
 use futures_util::StreamExt;
 use gloo::net::eventsource::futures::EventSource;
-use leptos::prelude::*;
 use leptos::task::spawn_local;
 use log::{error, info};
 use crate::types::{Alert, AlertLevel, CheckStatus, ServiceHealthCheckInfo};
 
 #[component]
 pub fn Dashboard() -> impl IntoView {
-    let (isConnected, setIsConnected) = signal(false);
-    let (lastUpdated, _setLastUpdated) = signal(Utc::now());
-    let (healthyCount, _setHealthyCount) = signal(4);
-    let (degradedCount, _setDegradedCount) = signal(0);
-    let (criticalCount, _setCriticalCount) = signal(0);
-    let (healthScore, _setHealthScore) = signal(100);
-    let (services, setServices) = signal(HashMap::<String, RwSignal<ServiceHealthCheckInfo>>::new());
-    let (recentAlerts, _setRecentAlerts) = signal(vec![
-        Alert{
-            service_name: "Instagram".to_string(),
-            level: AlertLevel::Warning,
-            message: "Cannot reach".to_string(),
-            timestamp: Utc::now(),
-        },
-        Alert{
-            service_name: "Facebook".to_string(),
-            level: AlertLevel::Critical,
-            message: "Service unreachable".to_string(),
-            timestamp: Utc::now(),
-        },
-    ]);
+    let (is_connected, set_is_connected) = signal(false);
+    let (last_updated, set_last_updated) = signal(Utc::now());
+    let (services, set_services) = signal(HashMap::<String, RwSignal<ServiceHealthCheckInfo>>::new());
+    let (recent_alerts, set_recent_alerts) = signal(Vec::<Alert>::new());
+    let navigate = use_navigate();
+
+    let stats = move || {
+        let s = services.get();
+        let total = s.len();
+        if total == 0 {
+            return (0, 0, 0, 100);
+        }
+        let mut healthy = 0;
+        let mut degraded = 0;
+        let mut unhealthy = 0;
+        for service in s.values() {
+            match service.get().latest_status.status {
+                CheckStatus::Healthy => healthy += 1,
+                CheckStatus::Degraded => degraded += 1,
+                CheckStatus::Unhealthy => unhealthy += 1,
+                CheckStatus::Unknown => {}
+            }
+        }
+        let score = if total > 0 { (healthy * 100) / total } else { 100 };
+        (healthy, degraded, unhealthy, score)
+    };
+
+    let healthy_count = move || stats().0;
+    let degraded_count = move || stats().1;
+    let critical_count = move || stats().2;
+    let health_score = move || stats().3;
+
     Effect::new(move |_| {
         let mut event_source = match EventSource::new("/api/events") {
             Ok(es) => {
                 info!("SSE connection established.");
-                *setIsConnected.write() = true;
+                set_is_connected.set(true);
                 es
             }
             Err(e) => {
                 error!("Failed to connect to SSE endpoint: {:?}", e);
-                *setIsConnected.write() = false;
+                set_is_connected.set(false);
                 return;
             }
         };
@@ -55,7 +67,43 @@ pub fn Dashboard() -> impl IntoView {
                 if let Some(data_str) = msg.data().as_string() {
                     match serde_json::from_str::<ServiceHealthCheckInfo>(&data_str) {
                         Ok(new_message) => {
-                            setServices.update(|s| {
+                            set_last_updated.set(Utc::now());
+                            let is_new_service = !services.with(|s| s.contains_key(&new_message.name));
+
+                            if !is_new_service {
+                                let old_status = services.with(|s| {
+                                    s.get(&new_message.name).unwrap().get().latest_status.status
+                                });
+                                if old_status != new_message.latest_status.status {
+                                    match new_message.latest_status.status {
+                                        CheckStatus::Degraded => {
+                                            set_recent_alerts.update(|alerts| {
+                                                alerts.insert(0, Alert {
+                                                    service_name: new_message.name.clone(),
+                                                    level: AlertLevel::Warning,
+                                                    message: new_message.latest_status.status_message.clone(),
+                                                    timestamp: new_message.latest_status.timestamp,
+                                                });
+                                                alerts.truncate(5);
+                                            });
+                                        }
+                                        CheckStatus::Unhealthy => {
+                                            set_recent_alerts.update(|alerts| {
+                                                alerts.insert(0, Alert {
+                                                    service_name: new_message.name.clone(),
+                                                    level: AlertLevel::Critical,
+                                                    message: new_message.latest_status.status_message.clone(),
+                                                    timestamp: new_message.latest_status.timestamp,
+                                                });
+                                                alerts.truncate(5);
+                                            });
+                                        }
+                                        _ => {}
+                                    }
+                                }
+                            }
+
+                            set_services.update(|s| {
                                 if let Some(service_signal) = s.get(&new_message.name) {
                                     service_signal.set(new_message);
                                 } else {
@@ -71,7 +119,7 @@ pub fn Dashboard() -> impl IntoView {
             }
             info!("SSE connection closed.");
             event_source.close();
-            *setIsConnected.write() = false;
+            set_is_connected.set(false);
         });
     });
 
@@ -91,24 +139,24 @@ pub fn Dashboard() -> impl IntoView {
                         <div class="flex items-center space-x-4">
                             <div class="flex items-center space-x-2">
                                 <div class=move || {
-                                    if isConnected.get() {
-                                        "w-3 h-3 rounded-full if bg-green-400"
+                                    if is_connected.get() {
+                                        "w-3 h-3 rounded-full bg-green-400"
                                     } else {
-                                        "w-3 h-3 rounded-full if bg-red-400"
+                                        "w-3 h-3 rounded-full bg-red-400"
                                     }
                                 }></div>
                                 <span class="text-sm text-white-600">
                                     {move || {
-                                        if isConnected.get() {
-                                            " Connected "
+                                        if is_connected.get() {
+                                            "Connected"
                                         } else {
-                                            " Disconnected "
+                                            "Disconnected"
                                         }
                                     }}
                                 </span>
                             </div>
                             <span class="text-sm text-white-500">
-                                Last updated: {lastUpdated.get().format("%H:%M:%S").to_string()}
+                                Last updated: {move || last_updated.get().format("%H:%M:%S").to_string()}
                             </span>
                         </div>
                     </div>
@@ -139,7 +187,7 @@ pub fn Dashboard() -> impl IntoView {
                                         Healthy Services
                                     </dt>
                                     <dd class="text-lg font-medium text-white-900">
-                                        {healthyCount.get()}
+                                        {healthy_count}
                                     </dd>
                                 </dl>
                             </div>
@@ -168,7 +216,7 @@ pub fn Dashboard() -> impl IntoView {
                                         Degraded Services
                                     </dt>
                                     <dd class="text-lg font-medium text-white-900">
-                                        {degradedCount.get()}
+                                        {degraded_count}
                                     </dd>
                                 </dl>
                             </div>
@@ -197,7 +245,7 @@ pub fn Dashboard() -> impl IntoView {
                                         Critical Services
                                     </dt>
                                     <dd class="text-lg font-medium text-white-900">
-                                        {criticalCount.get()}
+                                        {critical_count}
                                     </dd>
                                 </dl>
                             </div>
@@ -226,7 +274,7 @@ pub fn Dashboard() -> impl IntoView {
                                         Overall Health Score
                                     </dt>
                                     <dd class="text-lg font-medium text-white-900">
-                                        {healthScore.get()}%
+                                        {move || format!("{}%", health_score())}
                                     </dd>
                                 </dl>
                             </div>
@@ -308,20 +356,35 @@ pub fn Dashboard() -> impl IntoView {
                             </div>
                             <div class="px-6 py-4 space-y-3">
                                 <button
-                                    on:click=move |_| {}
-                                    class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray bg-blue-600 hover:bg-blue-700"
+                                    on:click={
+                                        let navigate = navigate.clone();
+                                        move |_| {
+                                            navigate("/analytics", Default::default());
+                                        }
+                                    }
+                                    class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray bg-blue-600 hover:bg-blue-700 transform hover:scale-105 transition-transform"
                                 >
                                     View Analytics
                                 </button>
                                 <button
-                                    on:click=move |_| {}
-                                    class="w-full flex items-center justify-center px-4 py-2 border border-white-300 text-sm font-medium rounded-md text-white-700 bg-gray hover:bg-white-50"
+                                    on:click={
+                                        let navigate = navigate.clone();
+                                        move |_| {
+                                            navigate("/alerts", Default::default());
+                                        }
+                                    }
+                                    class="w-full flex items-center justify-center px-4 py-2 border border-white-300 text-sm font-medium rounded-md text-white-700 bg-gray hover:bg-white-50 transform hover:scale-105 transition-transform"
                                 >
                                     Manage Alerts
                                 </button>
                                 <button
-                                    on:click=move |_| {}
-                                    class="w-full flex items-center justify-center px-4 py-2 border border-white-300 text-sm font-medium rounded-md text-white-700 bg-gray hover:bg-white-50"
+                                    on:click={
+                                        let navigate = navigate.clone();
+                                        move |_| {
+                                            navigate("/dependencies", Default::default());
+                                        }
+                                    }
+                                    class="w-full flex items-center justify-center px-4 py-2 border border-white-300 text-sm font-medium rounded-md text-white-700 bg-gray hover:bg-white-50 transform hover:scale-105 transition-transform"
                                 >
                                     View Dependencies
                                 </button>
@@ -338,7 +401,7 @@ pub fn Dashboard() -> impl IntoView {
                                         AlertLevel::Warning => "bg-orange-400",
                                         AlertLevel::Info => "bg-blue-400",
                                     };
-                                    if recentAlerts.with(|alerts| alerts.is_empty()) {
+                                    if recent_alerts.with(|alerts| alerts.is_empty()) {
                                         view! {
                                             <p class="text-sm text-white-500">"No recent alerts"</p>
                                         }
@@ -346,11 +409,11 @@ pub fn Dashboard() -> impl IntoView {
                                     } else {
                                         view! {
                                             <For
-                                                each=move || recentAlerts.get().into_iter().take(5)
-                                                key=|alert| alert.service_name.clone()
+                                                each=move || recent_alerts.get().into_iter().take(5)
+                                                key=|alert| alert.timestamp.to_string()
                                                 children=move |alert| {
                                                     view! {
-                                                        <div class="flex items-start space-x-3">
+                                                        <div class="flex items-start space-x-3 p-2">
                                                             <div class="flex-shrink-0">
                                                                 <div class=format!(
                                                                     "w-2 h-2 rounded-full {} mt-2",
