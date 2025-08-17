@@ -1,4 +1,11 @@
 #[cfg(feature = "ssr")]
+use actix::Actor;
+#[cfg(feature = "ssr")]
+use health_check::actors::{OrchestratorActor, RegisterActor};
+#[cfg(feature = "ssr")]
+use health_check::api::server_api::AppState;
+
+#[cfg(feature = "ssr")]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     use actix_files::Files;
@@ -6,16 +13,15 @@ async fn main() -> std::io::Result<()> {
     use health_check::actors::BroadcastActor;
     use health_check::actors::HttpHealthCheckActor;
     use health_check::app::*;
-    use health_check::types::ServiceConfiguration;
     use leptos::config::get_configuration;
     use leptos::prelude::*;
     use leptos_actix::{generate_route_list, LeptosRoutes};
     use leptos_meta::MetaTags;
-    use std::sync::Arc;
     use std::io::Error;
     use tokio::sync::broadcast;
     use health_check::actors::HealthCheckInfo;
     use health_check::api::server_api::sse_handler;
+    use health_check::types::config::configs::ServiceConfiguration;
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
@@ -23,22 +29,29 @@ async fn main() -> std::io::Result<()> {
     let addr = conf.leptos_options.site_addr;
 
     let (sender, _) = broadcast::channel::<HealthCheckInfo>(100);
-    let broadcast_actor = Arc::new(actix::Actor::start(BroadcastActor::new(sender.clone())));
+    let orchestrator_addr = OrchestratorActor::default().start();
+
+    let app_state = AppState{
+        sender: sender.clone(),
+        actor: orchestrator_addr.clone(),
+    };
+
+    let broadcast_actor = BroadcastActor::new(sender).start();
 
     let config = ServiceConfiguration::load_from_file("config.toml")
         .map_err(|e| Error::other(format!("{:?}", e)))?;
 
     for service in config.services {
-        actix::Actor::start(HttpHealthCheckActor::new(
+        let actor_addr = HttpHealthCheckActor::new(
             service.name,
             service.url,
             config.global.check_interval_seconds,
             service.timeout_seconds
                 .map_or(config.global.timeout_seconds, |v| v),
             service.response_code.map_or(200, |v| v),
-            service.headers,
             broadcast_actor.clone(),
-        ));
+        ).start();
+        orchestrator_addr.do_send(RegisterActor(actor_addr));
     }
 
     HttpServer::new(move || {
@@ -49,12 +62,12 @@ async fn main() -> std::io::Result<()> {
         println!("listening on http://{}", &addr);
 
         App::new()
-            .app_data(web::Data::new(sender.clone()))
+            .app_data(web::Data::new(app_state.clone()))
             // serve JS/WASM/CSS from `pkg`
             .service(Files::new("/pkg", format!("{site_root}/pkg")))
             // serve other assets from the `assets` directory
             .service(Files::new("/assets", &site_root))
-            // serve the favicon from /favicon.ico
+            // serve the favicon from /favicon.png
             .service(favicon)
             .service(sse_handler)
             .leptos_routes(routes, {
@@ -89,14 +102,14 @@ async fn main() -> std::io::Result<()> {
 }
 
 #[cfg(feature = "ssr")]
-#[actix_web::get("favicon.ico")]
+#[actix_web::get("favicon.png")]
 async fn favicon(
     leptos_options: actix_web::web::Data<leptos::config::LeptosOptions>,
 ) -> actix_web::Result<actix_files::NamedFile> {
     let leptos_options = leptos_options.into_inner();
     let site_root = &leptos_options.site_root;
     Ok(actix_files::NamedFile::open(format!(
-        "{site_root}/favicon.ico"
+        "{site_root}/favicon.png"
     ))?)
 }
 
@@ -114,8 +127,10 @@ pub fn main() {
     // prefer using `cargo leptos serve` instead
     // to run: `trunk serve --open --features csr`
     use health_check::app::*;
+    use log::Level;
 
     console_error_panic_hook::set_once();
+    _ = console_log::init_with_level(Level::Debug);
 
     leptos::mount_to_body(App);
 }

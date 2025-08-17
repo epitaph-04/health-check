@@ -1,5 +1,5 @@
 [globalSettings]
-check_interval_seconds = 60
+check_interval_seconds = 15
 timeout_seconds = 5
 
 [[services]]
